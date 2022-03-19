@@ -39,7 +39,8 @@ def _append_pdfs_from_folder(
     sorce_folder: Path,
     root_title: str,
     add_flat_hierachy: bool,
-):
+) -> None:
+
     pdfs = sorted(sorce_folder.rglob("*.pdf"))
 
     dirs = {}
@@ -103,7 +104,11 @@ def add(
     p = Pdf.open(existing_pdf)
     p.add_blank_page()
 
-    _append_pdfs(p, sorted(pdfs_to_add), f"PDFs added {timestamp_outline()}")
+    _append_pdfs(
+        p,
+        sorted(pdfs_to_add),
+        f"PDFs added {timestamp_outline()}",
+    )
 
     p.save(
         existing_pdf.with_stem(f"{existing_pdf.stem} - PDFs added {timestamp_file()}")
@@ -116,11 +121,14 @@ def merge(
     output_folder: Path,
     filename: str = "PDFs merged",
 ):
-    """Merges pdfs into a new file"""
-    # NOTE existing bookmarks will be overwritten
+    """Merges pdfs into a new file, existing bookmarks will be overwritten"""
     p = Pdf.new()
 
-    _append_pdfs(p, sorted(pdfs_to_merge), f"PDFs merged {timestamp_outline()}")
+    _append_pdfs(
+        p,
+        sorted(pdfs_to_merge),
+        f"PDFs merged {timestamp_outline()}",
+    )
 
     output_folder.mkdir(parents=True, exist_ok=True)
     p.save(output_folder / f"{filename} {timestamp_file()}.pdf")
@@ -155,7 +163,7 @@ def merge_from_folder(
     filename: str = "PDFs merged",
     add_flat_hierachy: bool = False,
 ):
-    """Merges all pdfs from a folder into a new file"""
+    """Merges all pdfs from a folder into a new file, existing bookmarks will be overwritten"""
     p = Pdf.new()
     p.add_blank_page()
 
