@@ -1,8 +1,11 @@
 # pdfmb
 Merge PDF files with bookmarks
 
+<p float="left">
 <img height="400" alt="folders" src="docs/img/folders.png">
 <img height="400" alt="outline" src="docs/img/outline.png">
+</p>
+
 
 ## Installation
 You can install this package via pip.
