@@ -1,18 +1,27 @@
+import pathlib
 from setuptools import setup, find_packages
 
+# The directory containing this file
+HERE = pathlib.Path(__file__).parent
 
-def read_requirements():
-    with open("requirements.txt") as req:
-        content = req.read()
-        requirements = content.split("\n")
+# The text of the README file
+README = (HERE / "README.md").read_text()
 
-    return requirements
-
-
+# This call to setup() does all the work
 setup(
     name="pdfmb",
-    version="0.1",
-    packages=find_packages(),
+    version="0.0.1",
+    description="Merge PDFs with bookmarks",
+    long_description=README,
+    long_description_content_type="text/markdown",
+    url="https://github.com/1081/pdfmb",
+    license="MIT",
+    classifiers=[
+        "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+    ],
+    packages=find_packages(include=["pdfmb"]),
     include_package_data=True,
-    install_requires=read_requirements(),
+    install_requires=["pikepdf"],
 )

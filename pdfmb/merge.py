@@ -36,12 +36,12 @@ def _append_pdfs(
 
 def _append_pdfs_from_folder(
     p: Pdf,
-    sorce_folder: Path,
+    source_folder: Path,
     root_title: str,
     add_flat_hierachy: bool,
 ) -> None:
 
-    pdfs = sorted(sorce_folder.rglob("*.pdf"))
+    pdfs = sorted(source_folder.rglob("*.pdf"))
 
     dirs = {}
     for pdf in pdfs:
@@ -61,15 +61,15 @@ def _append_pdfs_from_folder(
         outline.root.append(ol_root)
 
         ol_flat = OutlineItem(
-            f"{sorce_folder.name} (folder structure flattend)", page_count
+            f"{source_folder.name} (folder structure flattend)", page_count
         )
 
         if add_flat_hierachy:
             ol_root.children.append(ol_flat)
 
-        ol_root.children.append(dirs[sorce_folder])
+        ol_root.children.append(dirs[source_folder])
 
-        for file in sorted(sorce_folder.rglob("*.pdf")):
+        for file in sorted(source_folder.rglob("*.pdf")):
             src = Pdf.open(file)
             pages = len(src.pages)
 
