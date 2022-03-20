@@ -39,7 +39,7 @@ def _append_pdfs_from_folder(
     source_folder: Path,
     root_title: str,
     add_flat_hierachy: bool,
-) -> None:
+) -> int:
 
     pdfs = sorted(source_folder.rglob("*.pdf"))
 
@@ -95,6 +95,8 @@ def _append_pdfs_from_folder(
             if d.parent in dirs:
                 dirs[d.parent].children.append(dirs[d])
 
+    return len(pdfs)
+
 
 def add(
     pdfs_to_add: Iterable[Path],
@@ -104,16 +106,21 @@ def add(
     p = Pdf.open(existing_pdf)
     p.add_blank_page()
 
+    pdfs = sorted(pdfs_to_add)
+
     _append_pdfs(
         p,
-        sorted(pdfs_to_add),
+        pdfs,
         f"PDFs added {timestamp_outline()}",
     )
 
-    p.save(
-        existing_pdf.with_stem(f"{existing_pdf.stem} - PDFs added {timestamp_file()}")
+    output_file = existing_pdf.with_stem(
+        f"{existing_pdf.stem} - PDFs added {timestamp_file()}"
     )
+    p.save(output_file)
     p.close
+
+    print(f"pdfbm: {len(pdfs)} PDFs added -> {output_file.absolute()}")
 
 
 def merge(
@@ -123,16 +130,20 @@ def merge(
 ):
     """Merges pdfs into a new file, existing bookmarks will be overwritten"""
     p = Pdf.new()
+    pdfs = sorted(pdfs_to_merge)
 
     _append_pdfs(
         p,
-        sorted(pdfs_to_merge),
+        pdfs,
         f"PDFs merged {timestamp_outline()}",
     )
 
     output_folder.mkdir(parents=True, exist_ok=True)
-    p.save(output_folder / f"{filename} {timestamp_file()}.pdf")
+    output_file = output_folder / f"{filename} {timestamp_file()}.pdf"
+    p.save(output_file)
     p.close
+
+    print(f"pdfbm: {len(pdfs)} PDFs merged -> {output_file.absolute()}")
 
 
 def add_from_folder(
@@ -144,17 +155,20 @@ def add_from_folder(
     p = Pdf.open(existing_pdf)
     p.add_blank_page()
 
-    _append_pdfs_from_folder(
+    z = _append_pdfs_from_folder(
         p,
         source_folder,
         f"PDFs added {timestamp_outline()}",
         add_flat_hierachy,
     )
 
-    p.save(
-        existing_pdf.with_stem(f"{existing_pdf.stem} - PDFs added {timestamp_file()}")
+    output_file = existing_pdf.with_stem(
+        f"{existing_pdf.stem} - PDFs added {timestamp_file()}"
     )
+    p.save(output_file)
     p.close
+
+    print(f"pdfbm: {z} PDFs added -> {output_file.absolute()}")
 
 
 def merge_from_folder(
@@ -167,7 +181,7 @@ def merge_from_folder(
     p = Pdf.new()
     p.add_blank_page()
 
-    _append_pdfs_from_folder(
+    z = _append_pdfs_from_folder(
         p,
         source_folder,
         f"PDFs merged {timestamp_outline()}",
@@ -175,5 +189,8 @@ def merge_from_folder(
     )
 
     output_folder.mkdir(parents=True, exist_ok=True)
-    p.save(output_folder / f"{filename} {timestamp_file()}.pdf")
+    output_file = output_folder / f"{filename} {timestamp_file()}.pdf"
+    p.save(output_file)
     p.close
+
+    print(f"pdfbm: {z} PDFs merged -> {output_file.absolute()}")
