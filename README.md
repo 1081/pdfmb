@@ -2,8 +2,9 @@
 Merge PDF files with bookmarks
 
 <p float="left">
-<img height="400" alt="folders" src="docs/img/folders.png">
-<img height="400" alt="outline" src="docs/img/outline.png">
+
+<img height="400" alt="folders" src="https://github.com/1081/pdfmb/blob/main/docs/img/folders.png?raw=True">
+<img height="400" alt="outline" src="https://github.com/1081/pdfmb/blob/main/docs/img/outline.png?raw=True">
 </p>
 
 
