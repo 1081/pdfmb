@@ -10,8 +10,9 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="pdfmb",
-    version="0.0.4",
-    description="Merge PDFs with bookmarks",
+    version="0.0.5",
+    description="Merge PDF files with bookmarks",
+    keywords="pdf merge add bookmark bookmarks outline folder pikepdf pdfs nested hierarchy structure",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/1081/pdfmb",
@@ -21,6 +22,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
     ],
+    python_requires=">=3",
     packages=find_packages(include=["pdfmb"]),
     include_package_data=True,
     install_requires=["pikepdf"],

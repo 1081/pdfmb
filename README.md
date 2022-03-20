@@ -1,12 +1,12 @@
 # pdfmb
-Merge PDF files with bookmarks
+Merge PDF files with bookmarks.
 
 <p float="left">
-
 <img height="400" alt="folders" src="https://github.com/1081/pdfmb/blob/main/docs/img/folders.png?raw=True">
 <img height="400" alt="outline" src="https://github.com/1081/pdfmb/blob/main/docs/img/outline.png?raw=True">
 </p>
 
+All the work is done by the excellent library [pikepdf](https://github.com/pikepdf/pikepdf).
 
 ## Installation
 You can install this package via pip.
