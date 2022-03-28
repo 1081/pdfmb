@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Iterable
+from typing import Callable, Iterable
 
 from pikepdf import Pdf, OutlineItem
 from pdfmb.utils import timestamp_outline, timestamp_file
@@ -9,6 +9,7 @@ def _append_pdfs(
     p: Pdf,
     pdfs: Iterable[Path],
     root_title: str,
+    mapping: Callable[[str], str],
 ) -> None:
 
     page_count = len(p.pages)
@@ -21,7 +22,14 @@ def _append_pdfs(
             src = Pdf.open(file)
             pages = len(src.pages)
 
-            ol_file = OutlineItem(file.name, page_count)
+            if mapping is not None:
+                file_name = mapping(file.name)
+                print(file_name)
+            else:
+                file_name = file.name
+
+            ol_file = OutlineItem(file_name, page_count)
+
             ol_root.children.append(ol_file)
 
             if pages > 1:
@@ -39,6 +47,7 @@ def _append_pdfs_from_folder(
     source_folder: Path,
     root_title: str,
     add_flat_hierachy: bool,
+    mapping: Callable[[str], str],
 ) -> int:
 
     pdfs = sorted(source_folder.rglob("*.pdf"))
@@ -73,7 +82,13 @@ def _append_pdfs_from_folder(
             src = Pdf.open(file)
             pages = len(src.pages)
 
-            ol_file = OutlineItem(file.name, page_count)
+            if mapping is not None:
+                file_name = mapping(file.name)
+                print(file_name)
+            else:
+                file_name = file.name
+
+            ol_file = OutlineItem(file_name, page_count)
 
             # add flat_hierachy
             ol_flat.children.append(ol_file)
@@ -101,6 +116,7 @@ def _append_pdfs_from_folder(
 def add(
     pdfs_to_add: Iterable[Path],
     existing_pdf: Path,
+    mapping: Callable = None,
 ):
     """Extends an existing pdf and stores a new file at the same location"""
     p = Pdf.open(existing_pdf)
@@ -112,6 +128,7 @@ def add(
         p,
         pdfs,
         f"PDFs added {timestamp_outline()}",
+        mapping,
     )
 
     output_file = existing_pdf.with_stem(
@@ -127,6 +144,7 @@ def merge(
     pdfs_to_merge: Iterable[Path],
     output_folder: Path,
     filename: str = "PDFs merged",
+    mapping: Callable = None,
 ):
     """Merges pdfs into a new file, existing bookmarks will be overwritten"""
     p = Pdf.new()
@@ -136,6 +154,7 @@ def merge(
         p,
         pdfs,
         f"PDFs merged {timestamp_outline()}",
+        mapping,
     )
 
     output_folder.mkdir(parents=True, exist_ok=True)
@@ -150,6 +169,7 @@ def add_from_folder(
     source_folder: Path,
     existing_pdf: Path,
     add_flat_hierachy: bool = False,
+    mapping: Callable = None,
 ):
     """Extends an existing pfd with all pdfs from a folder and stores a new file at the same location"""
     p = Pdf.open(existing_pdf)
@@ -160,6 +180,7 @@ def add_from_folder(
         source_folder,
         f"PDFs added {timestamp_outline()}",
         add_flat_hierachy,
+        mapping,
     )
 
     output_file = existing_pdf.with_stem(
@@ -176,6 +197,7 @@ def merge_from_folder(
     output_folder: Path,
     filename: str = "PDFs merged",
     add_flat_hierachy: bool = False,
+    mapping: Callable = None,
 ):
     """Merges all pdfs from a folder into a new file, existing bookmarks will be overwritten"""
     p = Pdf.new()
@@ -186,6 +208,7 @@ def merge_from_folder(
         source_folder,
         f"PDFs merged {timestamp_outline()}",
         add_flat_hierachy,
+        mapping,
     )
 
     output_folder.mkdir(parents=True, exist_ok=True)
