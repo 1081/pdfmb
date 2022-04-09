@@ -10,7 +10,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="pdfmb",
-    version="0.0.5",
+    version="0.0.6",
     description="Merge PDF files with bookmarks",
     keywords="pdf merge add bookmark bookmarks outline folder pikepdf pdfs nested hierarchy structure",
     long_description=README,

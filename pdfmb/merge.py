@@ -135,7 +135,7 @@ def add(
         f"{existing_pdf.stem} - PDFs added {timestamp_file()}"
     )
     p.save(output_file)
-    p.close
+    p.close()
 
     print(f"pdfbm: {len(pdfs)} PDFs added -> {output_file.absolute()}")
 
@@ -160,7 +160,7 @@ def merge(
     output_folder.mkdir(parents=True, exist_ok=True)
     output_file = output_folder / f"{filename} {timestamp_file()}.pdf"
     p.save(output_file)
-    p.close
+    p.close()
 
     print(f"pdfbm: {len(pdfs)} PDFs merged -> {output_file.absolute()}")
 
@@ -187,7 +187,7 @@ def add_from_folder(
         f"{existing_pdf.stem} - PDFs added {timestamp_file()}"
     )
     p.save(output_file)
-    p.close
+    p.close()
 
     print(f"pdfbm: {z} PDFs added -> {output_file.absolute()}")
 
@@ -214,6 +214,6 @@ def merge_from_folder(
     output_folder.mkdir(parents=True, exist_ok=True)
     output_file = output_folder / f"{filename} {timestamp_file()}.pdf"
     p.save(output_file)
-    p.close
+    p.close()
 
     print(f"pdfbm: {z} PDFs merged -> {output_file.absolute()}")
