@@ -135,7 +135,7 @@ def add(
         f"{existing_pdf.stem} - PDFs added {timestamp_file()}"
     )
     p.save(output_file)
-    p.close
+    p.close()
 
     print(f"pdfbm: {len(pdfs)} PDFs added -> {output_file.absolute()}")
 
@@ -160,7 +160,7 @@ def merge(
     output_folder.mkdir(parents=True, exist_ok=True)
     output_file = output_folder / f"{filename} {timestamp_file()}.pdf"
     p.save(output_file)
-    p.close
+    p.close()
 
     print(f"pdfbm: {len(pdfs)} PDFs merged -> {output_file.absolute()}")
 
@@ -217,3 +217,69 @@ def merge_from_folder(
     p.close
 
     print(f"pdfbm: {z} PDFs merged -> {output_file.absolute()}")
+
+
+BookmarkNameMapping = Callable[[str], str]
+
+
+def _append_pdfs2(
+    p: Pdf,
+    pdfs: Iterable[Path],
+    root_title: str,
+    folder_strucutre: bool,
+    bookmark_mapping: BookmarkNameMapping,
+):
+
+    pass
+
+
+def add2(
+    pdfs: Iterable[Path],
+    existing_pdf: Path,
+    folder_strucutre: bool = False,
+    bookmark_mapping: BookmarkNameMapping = None,
+):
+    p = Pdf.open(existing_pdf)
+    p.add_blank_page()
+
+    _append_pdfs2(
+        p=p,
+        pdfs=sorted(pdfs),
+        root_title=f"PDFs added {timestamp_outline()}",
+        folder_strucutre=folder_strucutre,
+        bookmark_mapping=bookmark_mapping,
+    )
+
+    output_file = existing_pdf.with_stem(
+        f"{existing_pdf.stem} - PDFs added {timestamp_file()}"
+    )
+    p.save(output_file)
+    p.close()
+
+    print(f"pdfbm: {len(pdfs)} PDFs added -> {output_file.absolute()}")
+
+
+def merge2(
+    pdfs: Iterable[Path],
+    output_folder: Path,
+    filename: str = "PDFs merged ",
+    folder_strucutre: bool = False,
+    bookmark_mapping: BookmarkNameMapping = None,
+):
+    p = Pdf.new()
+    p.add_blank_page()
+
+    _append_pdfs2(
+        p=p,
+        pdfs=sorted(pdfs),
+        root_title=f"PDFs merged {timestamp_outline()}",
+        folder_strucutre=folder_strucutre,
+        bookmark_mapping=bookmark_mapping,
+    )
+
+    output_folder.mkdir(parents=True, exist_ok=True)
+    output_file = output_folder / f"{filename} {timestamp_file()}.pdf"
+    p.save(output_file)
+    p.close()
+
+    print(f"pdfbm: {len(pdfs)} PDFs merged -> {output_file.absolute()}")
