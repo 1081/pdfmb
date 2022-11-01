@@ -169,6 +169,8 @@ def add_from_folder(
     source_folder: Path,
     existing_pdf: Path,
     add_flat_hierachy: bool = False,
+    output_folder: str = None,
+    filename: str = None,
     mapping: Callable = None,
 ):
     """Extends an existing pfd with all pdfs from a folder and stores a new file at the same location"""
@@ -183,9 +185,12 @@ def add_from_folder(
         mapping,
     )
 
-    output_file = existing_pdf.with_stem(
-        f"{existing_pdf.stem} - PDFs added {timestamp_file()}"
-    )
+    if filename and output_folder:
+        output_file = output_folder / f"{filename} {timestamp_file()}.pdf"
+    else:
+        output_file = existing_pdf.with_stem(
+            f"{existing_pdf.stem} - PDFs added {timestamp_file()}"
+        )
     p.save(output_file)
     p.close()
 

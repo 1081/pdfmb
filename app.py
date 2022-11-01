@@ -1,17 +1,14 @@
-import dearpygui.dearpygui as dpg
-import dearpygui.demo as demo
-from pathlib import Path
-import pdfmb
 import platform
+from pathlib import Path
 from subprocess import call
-from dataclasses import dataclass, field
-from time import sleep
+
+import dearpygui.dearpygui as dpg
 
 from model import model
 
+# import dearpygui.demo as demo
 
-# example pdfs/file1.pdf
-# example pdfs
+# NOTE Build with: pyinstaller --onefile --app.py
 
 
 def macos_settings():
@@ -179,19 +176,53 @@ def update_output_folder():
 
 
 def clicked_create_pdf():
-    dpg.show_item(create_pdf_loading_indicator)
-    sleep(2)
-    dpg.hide_item(create_pdf_loading_indicator)
-    # pdfmb.merge_from_folder(
-    #     source_folder=Path("example pdfs"),
-    #     output_folder=Path("output"),
-    # )
+    from pdfmb import add_from_folder, merge_from_folder
 
-    # pdfmb.add_from_folder(
-    #     source_folder=Path("example pdfs"),
-    #     existing_pdf=Path("example pdfs/file1.pdf"),
-    #     add_flat_hierachy=True,
-    # )
+    dpg.show_item(create_pdf_loading_indicator)
+
+    if model.add:
+        print(model.source_folder)
+        print(model.output_folder)
+        print(model.output_filename)
+
+        if (
+            not model.source_folder
+            or not model.output_folder
+            or not model.output_filename
+        ):
+            print("input fehlt")
+            dpg.hide_item(create_pdf_loading_indicator)
+            return
+
+        add_from_folder(
+            source_folder=model.source_folder,
+            existing_pdf=model.existing_pdf,
+            output_folder=model.output_folder,
+            filename=model.output_filename,
+            add_flat_hierachy=model.flatten,
+        )
+
+    else:
+        print(model.source_folder)
+        print(model.output_folder)
+        print(model.output_filename)
+
+        if (
+            not model.source_folder
+            or not model.output_folder
+            or not model.output_filename
+        ):
+            print("input fehlt")
+            dpg.hide_item(create_pdf_loading_indicator)
+            return
+
+        merge_from_folder(
+            source_folder=model.source_folder,
+            output_folder=model.output_folder,
+            filename=model.output_filename,
+            add_flat_hierachy=model.flatten,
+        )
+    dpg.hide_item(create_pdf_loading_indicator)
 
 
 def clicked_goto_output_folder():
@@ -281,8 +312,9 @@ with dpg.window(tag=primary_window):
     with dpg.group(horizontal=True):
         dpg.add_input_text(
             tag=output_folder,
-            default_value=model.output_folder,
             hint="Path to output folder",
+            default_value=model.output_folder,
+            enabled=False,
             callback=changed_output_folder,
         )
         dpg.add_text(
@@ -302,6 +334,7 @@ with dpg.window(tag=primary_window):
             tag=output_filename,
             hint="File name",
             default_value=model.output_filename,
+            enabled=False,
             callback=changed_output_filename,
         )
         dpg.add_text("- YYYY-MM-DD HHMMSS.pdf")
@@ -338,10 +371,10 @@ with dpg.window(tag=primary_window):
             color=(150, 255, 150, 255),
             show=False,
         )
-        dpg.add_text(
-            "PDF file created with 123 pages and 12 bookmakrs",
-            tag=create_pdf_feedback,
-        )
+        # dpg.add_text(
+        #     "PDF file created with 123 pages and 12 bookmakrs",
+        #     tag=create_pdf_feedback,
+        # )
 
     dpg.add_text("")
     dpg.add_button(
