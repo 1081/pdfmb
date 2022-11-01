@@ -42,7 +42,9 @@ spacer_height = 15
 primary_window = dpg.generate_uuid()
 #
 source_folder = dpg.generate_uuid()
-source_folder_pdfs = dpg.generate_uuid()
+source_folder_status = dpg.generate_uuid()
+source_folder_search_pdfs = dpg.generate_uuid()
+source_folder_show_pdfs = dpg.generate_uuid()
 source_folder_loading_indicator = dpg.generate_uuid()
 #
 check_add = dpg.generate_uuid()
@@ -78,13 +80,18 @@ class Model:
     output_filenname: str = None
     flatten: bool = False
 
-    def find_pdfs(self, folder):
+    def set_source_folder(self, folder):
         if folder and Path(folder).is_dir():
-            self.pdfs = sorted(Path(folder).rglob("*.pdf"))
-            self.source_folder = Path(folder).absolute()
+            self.source_folder = Path(folder)
+        else:
+            self.source_folder = None
+        return self.source_folder
+
+    def find_pdfs(self):
+        if self.source_folder:
+            self.pdfs = sorted(self.source_folder.rglob("*.pdf"))
         else:
             self.pdfs = []
-            self.source_folder = False
         return self.pdfs
 
     def set_existing_pdf(self, file: str):
@@ -128,20 +135,34 @@ model = Model()
 
 
 def changed_source_folder(sender, folder, user_data):
+    model.source_folder = []
+    model.pdfs = []
+    if model.set_source_folder(folder):
+        dpg.set_value(source_folder_status, "ok")
+        dpg.show_item(source_folder_search_pdfs)
+        dpg.set_item_label(source_folder_search_pdfs, label="search ")
+        dpg.hide_item(source_folder_show_pdfs)
+    else:
+        dpg.set_value(source_folder_status, "no valid path")
+        dpg.hide_item(source_folder_search_pdfs)
+        dpg.hide_item(source_folder_show_pdfs)
+
+
+def clicked_source_folder_search_pdfs(sender, app_data, user_data):
     dpg.show_item(source_folder_loading_indicator)
 
-    pdfs = model.find_pdfs(folder)
+    pdfs = model.find_pdfs()
     if pdfs:
-        dpg.set_item_label(source_folder_pdfs, label=f"PDFs ({len(pdfs)})")
-        dpg.enable_item(source_folder_pdfs)
+        dpg.set_item_label(source_folder_search_pdfs, label=f"PDFs ({len(pdfs)})")
+        dpg.show_item(source_folder_show_pdfs)
     else:
-        dpg.set_item_label(source_folder_pdfs, label="no valid path")
-        dpg.disable_item(source_folder_pdfs)
+        # dpg.set_item_label(source_folder_show_pdfs, label="no valid path")
+        dpg.hide_item(source_folder_show_pdfs)
 
     dpg.hide_item(source_folder_loading_indicator)
 
 
-def clicked_source_folder_pdfs():
+def clicked_source_show_pdfs():
     # TODO popup window
     for p in model.pdfs:
         print(p)
@@ -222,12 +243,23 @@ with dpg.window(tag=primary_window):
             hint="Path to folder",
             callback=changed_source_folder,
         )
+        dpg.add_text(
+            tag=source_folder_status,
+            default_value="no valid path",
+        )
         dpg.add_button(
-            tag=source_folder_pdfs,
-            label="no valid path",
-            width=100,
-            enabled=False,
-            callback=clicked_source_folder_pdfs,
+            tag=source_folder_search_pdfs,
+            label="search for pdfs",
+            width=130,
+            show=False,
+            callback=clicked_source_folder_search_pdfs,
+        )
+        dpg.add_button(
+            tag=source_folder_show_pdfs,
+            label="show pdfs",
+            width=130,
+            show=False,
+            callback=clicked_source_show_pdfs,
         )
         dpg.add_loading_indicator(
             tag=source_folder_loading_indicator,
@@ -281,7 +313,7 @@ with dpg.window(tag=primary_window):
             default_value=model.default_output_filename,
             callback=changed_output_filename,
         )
-        dpg.add_text(".pdf")
+        dpg.add_text("- YYYY-MM-DD HHMMSS.pdf")
 
     dpg.add_text(
         "A unique timestamp is automatically appended to the file name",
