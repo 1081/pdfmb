@@ -4,7 +4,9 @@ from pathlib import Path
 import pdfmb
 import platform
 from subprocess import call
-from dataclasses import dataclass, field
+
+from model import model
+
 
 # example pdfs/file1.pdf
 # example pdfs
@@ -52,17 +54,19 @@ group_existing_pdf = dpg.generate_uuid()
 existing_pdf = dpg.generate_uuid()
 existing_pdf_status = dpg.generate_uuid()
 #
+check_custom_output_folder = dpg.generate_uuid()
 output_folder = dpg.generate_uuid()
 output_folder_status = dpg.generate_uuid()
 #
+check_custom_output_filename = dpg.generate_uuid()
 output_filename = dpg.generate_uuid()
 timestamp_info = dpg.generate_uuid()
 #
 check_flatten = dpg.generate_uuid()
 #
 create_pdf = dpg.generate_uuid()
-create_pdf_feedback = dpg.generate_uuid()
 create_pdf_loading_indicator = dpg.generate_uuid()
+create_pdf_feedback = dpg.generate_uuid()
 #
 goto_output_folder = dpg.generate_uuid()
 open_pdf = dpg.generate_uuid()
@@ -70,22 +74,14 @@ open_pdf = dpg.generate_uuid()
 # ------------------------------------------------------------------------------
 
 
-@dataclass
-class Model:
-    source_folder: Path = None
-    pdfs: list[int] = field(default_factory=list)
-    add: bool = False
-    existing_pdf: Path = None
-    output_folder: Path = None
-    output_filenname: str = None
-    flatten: bool = False
-
-    def set_source_folder(self, folder):
+class Model2:
+    @property
+    def source_folder(self):
+        folder = dpg.get_value(source_folder)
         if folder and Path(folder).is_dir():
-            self.source_folder = Path(folder)
+            return Path(folder)
         else:
-            self.source_folder = None
-        return self.source_folder
+            return False
 
     def find_pdfs(self):
         if self.source_folder:
@@ -94,58 +90,102 @@ class Model:
             self.pdfs = []
         return self.pdfs
 
-    def set_existing_pdf(self, file: str):
+    @property
+    def existing_pdf(self):
+        file = dpg.get_value(existing_pdf)
         if file and Path(file).is_file() and file.endswith(".pdf"):
-            self.existing_pdf = Path(file).absolute()
+            return Path(file)
         else:
-            self.existing_pdf = False
-        return self.existing_pdf
+            return False
 
-    def set_output_folder(self, folder):
-        if folder and Path(folder).is_dir():
-            self.output_folder = Path(folder).absolute()
+    @property
+    def default_output_folder(self):
+        if dpg.get_value(check_add):
+            if self.existing_pdf:
+                return self.existing_pdf.parent
+            else:
+                return False
         else:
-            self.output_folder = self.default_output_folder
-        return self.output_folder
+            desktop = Path.home() / "Desktop"
+            if desktop.is_dir():
+                return desktop
+            else:
+                return False
 
-    def set_output_filename(self):
-        if self.add and self.existing_pdf:
-            return "added"
-            # return self.existing_pdf.with_stem(f"{existing_pdf.stem} - PDFs added")
+    @property
+    def output_folder(self):
+        if dpg.get_value(check_custom_output_folder):
+            folder = dpg.get_value(output_folder)
+            if folder and Path(folder).is_dir():
+                return Path(folder).absolute()
+            else:
+                return False
+        else:
+            self.default_output_folder
+
+    @property
+    def default_output_filename(self):
+        if dpg.get_value(check_add):
+            if self.existing_pdf:
+                return self.existing_pdf.stem
+            else:
+                return "abc"
         else:
             return "PDFs merged"
 
     @property
-    def default_output_folder(self):
-        desktop = Path.home() / "Desktop"
-        return desktop.absolute()
-
-    @property
-    def default_output_filename(self):
-        return "PDFs merged"
-
-
-def x():
-    print(model)
+    def output_filename(self):
+        if dpg.get_value(check_custom_output_filename):
+            filename = dpg.get_value(output_filename)
+            if filename:
+                return filename
+            else:
+                return "xyz"
+        else:
+            self.default_output_filename
 
 
-model = Model()
-
-# -------------------------------------------------------------------------------
+model2 = Model2()
 
 
-def changed_source_folder(sender, folder, user_data):
-    model.source_folder = []
-    model.pdfs = []
-    if model.set_source_folder(folder):
+def update_ui():
+    print(model.source_folder)
+    if model2.source_folder:
         dpg.set_value(source_folder_status, "ok")
         dpg.show_item(source_folder_search_pdfs)
-        dpg.set_item_label(source_folder_search_pdfs, label="search ")
-        dpg.hide_item(source_folder_show_pdfs)
+        if model.pdfs:
+            dpg.show_item(source_folder_show_pdfs)
+        else:
+            dpg.hide_item(source_folder_show_pdfs)
     else:
         dpg.set_value(source_folder_status, "no valid path")
         dpg.hide_item(source_folder_search_pdfs)
         dpg.hide_item(source_folder_show_pdfs)
+
+    if model.add:
+        dpg.show_item(group_existing_pdf)
+        if model.existing_pdf:
+            dpg.set_value(source_folder_status, "ok")
+        else:
+            dpg.set_value(source_folder_status, "no valid PDF file")
+    else:
+        dpg.hide_item(group_existing_pdf)
+
+
+def changed_source_folder(sender, folder, user_data):
+    model.set_source_folder(folder)
+    # model.source_folder = []
+    # model.pdfs = []
+    update_ui()
+    # if model.set_source_folder(folder):
+    #     dpg.set_value(source_folder_status, "ok")
+    #     dpg.show_item(source_folder_search_pdfs)
+    #     dpg.set_item_label(source_folder_search_pdfs, label="search ")
+    #     dpg.hide_item(source_folder_show_pdfs)
+    # else:
+    #     dpg.set_value(source_folder_status, "no valid path")
+    #     dpg.hide_item(source_folder_search_pdfs)
+    #     dpg.hide_item(source_folder_show_pdfs)
 
 
 def clicked_source_folder_search_pdfs(sender, app_data, user_data):
@@ -168,7 +208,7 @@ def clicked_source_show_pdfs():
         print(p)
 
 
-def update_check_add(sender, checked, user_data):
+def changed_check_add(sender, checked, user_data):
     if checked:
         model.add = True
         dpg.show_item(group_existing_pdf)
@@ -181,19 +221,17 @@ def update_check_add(sender, checked, user_data):
 
 def changed_existing_pdf(sender, file, user_data):
     if model.set_existing_pdf(file):
-        dpg.set_item_label(existing_pdf_status, label="ok")
+        dpg.set_value(existing_pdf_status, value="ok")
     else:
-        dpg.set_item_label(existing_pdf_status, label="not found")
+        dpg.set_value(existing_pdf_status, value="no valid PDF file")
     dpg.set_value(output_filename, value=model.set_output_filename())
 
 
 def changed_output_folder(sender, folder, user_data):
     if model.set_output_folder(folder):
-        # dpg.set_item_label(output_folder_status, label="ok")
-        dpg.set_value(output_folder_status, "ok")
+        dpg.set_value(output_folder_status, value="ok")
     else:
-        # dpg.set_item_label(output_folder_status, label="not found")
-        dpg.set_value(output_folder_status, "not found")
+        dpg.set_value(output_folder_status, value="no valid path")
 
 
 def changed_output_filename(sender, filename, user_data):
@@ -275,7 +313,7 @@ with dpg.window(tag=primary_window):
     dpg.add_checkbox(
         tag=check_add,
         label="Add to existing PDF",
-        callback=update_check_add,
+        callback=changed_check_add,
     )
     with dpg.group(tag=group_existing_pdf, show=False):
         with dpg.group(horizontal=True):
@@ -284,17 +322,20 @@ with dpg.window(tag=primary_window):
                 hint="Path to existing PDF",
                 callback=changed_existing_pdf,
             )
-            dpg.add_button(
+            dpg.add_text(
                 tag=existing_pdf_status,
-                label="no valid path",
-                width=100,
-                enabled=False,
+                default_value="no valid pdf file",
             )
     dpg.add_text("")
 
     # ------------------------------------------------------------------------------
 
     dpg.add_text("Output")
+    dpg.add_checkbox(
+        tag=check_custom_output_folder,
+        label="Custom folder",
+        # callback=changed_check_add,
+    )
     with dpg.group(horizontal=True):
         dpg.add_input_text(
             tag=output_folder,
@@ -306,6 +347,14 @@ with dpg.window(tag=primary_window):
             "",
             tag=output_folder_status,
         )
+
+    dpg.add_text("")
+
+    dpg.add_checkbox(
+        tag=check_custom_output_filename,
+        label="Custom filename",
+        # callback=changed_check_add,
+    )
     with dpg.group(horizontal=True):
         dpg.add_input_text(
             tag=output_filename,
