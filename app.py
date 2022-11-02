@@ -275,6 +275,20 @@ with dpg.window(tag=primary_window):
             show=False,
             callback=clicked_source_show_pdfs,
         )
+        # with dpg.popup(
+        #     source_folder_show_pdfs,
+        #     modal=True,
+        #     mousebutton=dpg.mvMouseButton_Left,
+        #     tag="show pdfs popup",
+        # ):
+        #     with dpg.table(header_row=True, row_background=True):
+        #         dpg.add_table_column(label="PDFs")
+        #         print(model.pdfs)
+        #         for p in model.pdfs:
+        #             with dpg.table_row():
+        #                 print(p)
+        #                 dpg.add_text(p)
+
         dpg.add_loading_indicator(
             tag=source_folder_loading_indicator,
             radius=1.4,
@@ -380,6 +394,7 @@ with dpg.window(tag=primary_window):
         # )
 
     dpg.add_text("")
+    dpg.add_separator()
     dpg.add_button(
         tag=goto_output_folder,
         label="Open output",
