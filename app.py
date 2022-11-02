@@ -8,21 +8,21 @@ from model import model
 
 # import dearpygui.demo as demo
 
-# NOTE Build with: pyinstaller --onefile --app.py
+# NOTE Build with: pyinstaller --onefile --windowed app.py
 
 
-def macos_settings():
-    if platform.system() == "Darwin":
-        font = Path("fonts/Menlo-Regular.ttf")
-        font_size = 13 * 2
-        scale = 0.5
+# def macos_settings():
+#     if platform.system() == "Darwin":
+#         font = Path("fonts/Menlo-Regular.ttf")
+#         font_size = 13 * 2
+#         scale = 0.5
 
-    with dpg.font_registry():
-        with dpg.font(font, font_size) as myfont:
-            dpg.add_font_range_hint(dpg.mvFontRangeHint_Default)
-            dpg.add_font_range(0x370, 0x3FF)
-    dpg.set_global_font_scale(scale)
-    dpg.bind_font(myfont)
+# with dpg.font_registry():
+#     with dpg.font(font, font_size) as myfont:
+#         dpg.add_font_range_hint(dpg.mvFontRangeHint_Default)
+#         dpg.add_font_range(0x370, 0x3FF)
+# dpg.set_global_font_scale(scale)
+# dpg.bind_font(myfont)
 
 
 def _log(sender, app_data, user_data):
@@ -32,7 +32,7 @@ def _log(sender, app_data, user_data):
 # ------------------------------------------------------------------------------
 
 dpg.create_context()
-macos_settings()
+# macos_settings()
 
 # ------------------------------------------------------------------------------
 
@@ -164,11 +164,7 @@ def update_output_filename():
 
 
 def update_output_folder():
-    print(1)
     dpg.set_value(output_folder, value=model.output_folder)
-
-    # print(model.custom_output_folder_path, "update output_folder_status")
-
     if model.output_folder:
         dpg.set_value(output_folder_status, value="ok")
     else:
@@ -226,11 +222,18 @@ def clicked_create_pdf():
 
 
 def clicked_goto_output_folder():
-    call(["open", model.output_folder.absolute()])
+    if platform.system() == "Darwin":
+        call(["open", model.output_folder.absolute()])
+    if platform.system() == "Windows":
+        import subprocess
+
+        cmd = rf"""explorer {model.output_folder}"""
+        subprocess.Popen(cmd)
 
 
 def clicked_open_pdf():
-    pass
+    if platform.system() == "Darwin":
+        pass
 
 
 def clicked_debug():
@@ -392,16 +395,15 @@ with dpg.window(tag=primary_window):
 
     # ------------------------------------------------------------------------------
 
-    dpg.add_text("")
-    dpg.add_button(
-        tag="debug",
-        label="debug",
-        width=300,
-        callback=clicked_debug,
-    )
+    # dpg.add_text("")
+    # dpg.add_button(
+    #     tag="debug",
+    #     label="debug",
+    #     width=300,
+    #     callback=clicked_debug,
+    # )
 
     # demo.show_demo()
-
 
 dpg.create_viewport(title="pdfmb", width=900, height=550)
 dpg.setup_dearpygui()
